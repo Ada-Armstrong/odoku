@@ -53,7 +53,7 @@ let get_block puzzle x y =
   let r3 =
     Array.sub puzzle.tiles (((ny + 2) * dim) + nx) block_size |> Array.to_list
   in
-  List.concat [r1; r2; r3]
+  List.concat [ r1; r2; r3 ]
 
 let pos_to_coord pos = (pos mod dim, pos / dim)
 
@@ -66,7 +66,7 @@ let find_option puzzle pos =
       let row = get_row puzzle y in
       let block = get_block puzzle x y in
       let seen =
-        List.concat [col; row; block]
+        List.concat [ col; row; block ]
         |> List.map (fun t -> match t with Empty _ -> 0 | Filled v -> v)
       in
       List.fold_left (fun acc x -> IntSet.remove x acc) options seen
@@ -81,30 +81,45 @@ let find_all_options puzzle =
          compare (snd a |> List.length) (snd b |> List.length))
   |> List.filter (fun (_, l) -> List.length l > 0)
 
-let print_puzzle puzzle =
+let build_puzzle_str puzzle =
   let rec repeat_str s n = if n <= 0 then "" else s ^ repeat_str s (n - 1) in
   let n = Array.length puzzle.tiles in
   let sep = "\n" ^ repeat_str "-" ((2 * (dim + 2)) - 1) ^ "\n" in
+  let buf = Buffer.create 256 in
   Array.iteri
     (fun i x ->
-      Printf.printf "%s "
-        (match x with Empty _ -> "*" | Filled y -> string_of_int y);
+      Buffer.add_string buf
+        (Printf.sprintf "%s "
+           (match x with Empty _ -> "*" | Filled y -> string_of_int y));
       if (i + 1) mod (block_size * dim) = 0 && i + 1 <> n then
-        Printf.printf "%s" sep
-      else if (i + 1) mod dim = 0 then Printf.printf "\n"
-      else if (i + 1) mod block_size = 0 then Printf.printf "| ")
-    puzzle.tiles
-  
-let print_all_options puzzle =
+        Buffer.add_string buf sep
+      else if (i + 1) mod dim = 0 then Buffer.add_char buf '\n'
+      else if (i + 1) mod block_size = 0 then Buffer.add_string buf "| ")
+    puzzle.tiles;
+  Buffer.contents buf
+
+let print_puzzle puzzle =
+  let s = build_puzzle_str puzzle in
+  Printf.printf "%s" s
+
+let build_all_options_str puzzle =
   let options = find_all_options puzzle in
+  let buf = Buffer.create 256 in
+  Buffer.add_string buf "Options:\n";
   List.iter
     (fun (p, opts) ->
       let x, y = pos_to_coord p in
-      Printf.printf "(%d, %d): " x y;
-      List.iter (fun opt -> Printf.printf "%d " opt) opts;
-      Printf.printf "\n")
+      Buffer.add_string buf (Printf.sprintf "(%d, %d): " x y);
+      List.iter
+        (fun opt -> Buffer.add_string buf (Printf.sprintf "%d " opt))
+        opts;
+      Buffer.add_char buf '\n')
     options;
-  Printf.printf "\n"
+  Buffer.contents buf
+
+let print_all_options puzzle =
+  let s = build_all_options_str puzzle in
+  Printf.printf "%s\n" s
 
 let fill_pos puzzle pos v = puzzle.tiles.(pos) <- Filled v
 
@@ -114,12 +129,12 @@ let equal s1 s2 =
 
 let filled_in puzzle =
   Array.for_all
-    (fun t -> (match t with Empty _ -> false | Filled _ -> true))
+    (fun t -> match t with Empty _ -> false | Filled _ -> true)
     puzzle.tiles
 
 let rec solve puzzle =
-  (* print_puzzle puzzle;
-  print_all_options puzzle; *)
+  Logs.debug (fun m -> m "\n%s" (build_puzzle_str puzzle));
+  Logs.debug (fun m -> m "\n%s" (build_all_options_str puzzle));
   let options = find_all_options puzzle in
   if List.length options = 0 && filled_in puzzle then (true, puzzle)
   else
@@ -128,7 +143,7 @@ let rec solve puzzle =
     in
     if List.length singles > 0 then (
       (* List.iter (fun (i, o) -> fill_pos puzzle i (List.hd o)) singles; *)
-      let (p, o) = List.hd singles in
+      let p, o = List.hd singles in
       fill_pos puzzle p (List.hd o);
       solve puzzle)
     else if List.length multiples > 0 then

@@ -1,7 +1,4 @@
 (executable
  (public_name sudoku)
  (name main)
- (libraries sudoku Str)
- (modes byte)
- (flags
-  (:standard -g)))
+ (libraries sudoku str logs))
