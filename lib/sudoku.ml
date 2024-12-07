@@ -13,7 +13,11 @@ let parse_fixed_size_array json key expected_size =
     let v = to_int x in
     match v with
     | 0 -> Empty (List.init dim (fun i -> i + 1) |> IntSet.of_list)
-    | y -> Filled y
+    | y ->
+        if 1 <= y && y <= 9 then Filled y
+        else
+          failwith
+            (Printf.sprintf "Expected value in range [1,9], but got %d" y)
   in
   let json_array = json |> member key |> to_list |> List.map to_tile in
   if List.length json_array <> expected_size then

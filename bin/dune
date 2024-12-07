@@ -1,4 +1,4 @@
 (executable
- (public_name sudoku)
+ (public_name odoku)
  (name main)
  (libraries sudoku str logs))

@@ -19,7 +19,7 @@
  (name sudoku)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml dune)
+ (depends ocaml dune yojson logs)
  (tags
   (topics "to describe" your project)))
 
