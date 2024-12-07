@@ -10,8 +10,8 @@ let () =
     Printf.printf "Usage: %s <filename>\n" Sys.argv.(0)
   else
     let filename = Sys.argv.(1) in
-    let puzzle = Sudoku.parse_sudoku filename in
-    Sudoku.print_puzzle puzzle;
+    let puzzle = Sudoku.parse filename in
+    Sudoku.print puzzle;
     let res, solved = Sudoku.solve puzzle in
     Printf.printf "Puzzle solved %b\n" res;
-    Sudoku.print_puzzle solved
+    Sudoku.print solved

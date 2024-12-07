@@ -30,8 +30,8 @@ let build_solve_test filename =
     let sol_filename =
       replace_substr ~old_substr:"problem" ~new_substr:"solution" filename
     in
-    let puzzle = Sudoku.parse_sudoku filename in
-    let solution = Sudoku.parse_sudoku sol_filename in
+    let puzzle = Sudoku.parse filename in
+    let solution = Sudoku.parse sol_filename in
     let res, solved = Sudoku.solve puzzle in
     assert res;
     assert (Sudoku.equal solved solution)
